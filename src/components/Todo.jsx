@@ -1,18 +1,30 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+
 function Todo(props) {
-
   const [isEditing, setEditing] = useState(false);
+  const wasEditing = usePrevious(isEditing);
 
-  const [newName , setNewName]= useState("");
+  const [newName, setNewName] = useState("");
 
-  function handleChange(e){
+  const editFieldRef = useRef(null);
+  const editButtonRef = useRef(null);
+
+  function handleChange(e) {
     setNewName(e.target.value);
   }
 
-  function handleSubmit(e){
+  function handleSubmit(e) {
     e.preventDefault();
-    props.editTask(props.id , newName);
+    props.editTask(props.id, newName);
     setNewName("");
     setEditing(false);
   }
@@ -23,7 +35,14 @@ function Todo(props) {
         <label className="todo-label" htmlFor={props.id}>
           New name for {props.name}
         </label>
-        <input id={props.id} className="todo-text" type="text" value={newName} onChange={handleChange}/>
+        <input
+          id={props.id}
+          className="todo-text"
+          type="text"
+          value={newName}
+          onChange={handleChange}
+          ref={editFieldRef}
+        />
       </div>
       <div className="btn-group">
         <button
@@ -55,7 +74,12 @@ function Todo(props) {
         </label>
       </div>
       <div className="btn-group">
-        <button type="button" className="btn" onClick={() => setEditing(true)}>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => setEditing(true)}
+          ref={editButtonRef}
+        >
           Edit <span className="visually-hidden">{props.name}</span>
         </button>
         <button
@@ -68,6 +92,14 @@ function Todo(props) {
       </div>
     </div>
   );
+
+  useEffect(() => {
+    if (!wasEditing && isEditing) {
+      editFieldRef.current.focus();
+    } else if (wasEditing && !isEditing) {
+      editButtonRef.current.focus();
+    }
+  }, [wasEditing, isEditing]);
 
   return isEditing ? editingTemplate : viewTemplate;
 }

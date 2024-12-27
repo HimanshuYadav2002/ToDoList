@@ -1,8 +1,9 @@
 /* eslint-disable react/prop-types */
-import { useState } from "react";
+import { useRef,useEffect, useState } from "react";
 
 function Form(props) {
   const [name, setName] = useState("");
+  const editFieldRef = useRef(null);
 
   function handleChange(event) {
     setName(event.target.value);
@@ -13,6 +14,10 @@ function Form(props) {
     props.addTask(name);
     setName("");
   }
+
+  useEffect(() => {
+    editFieldRef.current.focus();
+  }, []);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -29,6 +34,7 @@ function Form(props) {
         autoComplete="off"
         value={name}
         onChange={handleChange}
+        ref={editFieldRef}
       />
       <button type="submit" className="btn btn__primary btn__lg">
         Add
